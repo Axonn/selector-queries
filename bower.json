@@ -1,0 +1,13 @@
+{
+  "name": "selector-queries",
+  "version": "0.1.0",
+  "dependencies": {
+  },
+  "ignore": [
+    "src/*",
+	"test/*",
+	".gitignore",
+	"tools/*",
+	"demo.html"
+  ]
+}
