@@ -40,42 +40,62 @@ THE SOFTWARE.
             applyRules();
         }
     }
+	
+	function addElements(elements){
+		for (var i = 0, j = elements.length; i<j; ++i) {
+            var el = elements[i];
+            findContainerQueries(el);
+        }
+		if (loaded) { // if we're not 'loaded' yet, domLoaded will run applyRules() for us.
+            applyRules();
+        }
+	}
 
     function ignoreDataAttributes() {
         check_data_attributes = false;
     }
 
-    function findContainerQueries() {
+    function findContainerQueries(elem) {
         if (check_data_attributes) {
             // Find data-squery attributes.
             var nodes = [];
-            if (doc.querySelectorAll) {
-                var nodes = doc.querySelectorAll("[data-squery]");
+            if (elem.querySelectorAll) {
+                var nodes = elem.querySelectorAll("[data-squery]");
+				
             } else {
                 // If no query selectors.
-                var e = doc.getElementsByTagName("*");
+                var e = elem.getElementsByTagName("*");
                 for (var i = 0, j = e.length; i<j; ++i) {
                     if (e[i].getAttribute("data-squery")) {
                         nodes.push(e[i]);
                     }
                 }
             }
+			
             // Parse the data-squery attribute and store resulting rules on the element.
             for (var i = 0, j = nodes.length; i<j; ++i) {
                 var el = nodes[i];
-                var cq_rules = [];
-                var raw_rules = el.getAttribute("data-squery").split(" ");
-                for (var k = 0, l = raw_rules.length; k<l; ++k) {
-                    var rule = /(.*):([0-9]*)(px|em)=(.*)/.exec(raw_rules[k]);
-                    if (rule) {
-                        cq_rules.push(rule);
-                    }
-                }
-                el.cq_rules = el.cq_rules || [];
-                el.cq_rules = el.cq_rules.concat(cq_rules);
-                els.push(el);
+                addElementRules(el);
             }
+			
+			if (elem.getAttribute && elem.getAttribute("data-squery")){
+				addElementRules(elem);
+			}
         }
+    }
+	
+	function addElementRules(el) {
+		var cq_rules = [];
+		var raw_rules = el.getAttribute("data-squery").split(" ");
+		for (var k = 0, l = raw_rules.length; k<l; ++k) {
+			var rule = /(.*):([0-9]*)(px|em)=(.*)/.exec(raw_rules[k]);
+			if (rule) {
+				cq_rules.push(rule);
+			}
+		}
+		el.cq_rules = el.cq_rules || [];
+		el.cq_rules = el.cq_rules.concat(cq_rules);
+		els.push(el);
     }
 
     function applyRules() {
@@ -121,7 +141,7 @@ THE SOFTWARE.
             return;
         }
         loaded = true;
-        findContainerQueries();
+        findContainerQueries(doc);
         applyRules();
         if (win.addEventListener) {
             win.addEventListener("resize", applyRules, false);
@@ -187,6 +207,7 @@ THE SOFTWARE.
 
     win["SelectorQueries"] = {
         "add": add,
+		"addElements": addElements,
         "ignoreDataAttributes": ignoreDataAttributes
     }
 
